@@ -1,0 +1,81 @@
+---
+title: "Part2"
+author: "Mohit Anand"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Overview
+The aim of this report is to analyze the ToothGrowth DataSet in R.
+As per the help file of this dataset, the response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+First we will load the ggplot library and get the summary of ToothGrowth Dataset.
+```{r}
+library(ggplot2)
+
+data("ToothGrowth")
+str(ToothGrowth)
+```
+Since dose only has three values which are essentially categorical hence we convert it to factor.
+```{r}
+ToothGrowth$dose <- as.factor(ToothGrowth$dose)
+```
+
+## Exploratory Analysis
+Now we will create some plots to explore the data
+```{r}
+bxplt <- ggplot(aes(x=dose, y=len),data = ToothGrowth)+ geom_boxplot(aes(fill=dose)) + facet_grid(.~supp)+ xlab("Dose Amount") + ylab("Tooth Length")+ ggtitle(" Tooth Length compared to Dose amount")
+print (bxplt)
+```
+
+We can also explore on the basis of Dose amount
+```{r}
+bxplt2 <- ggplot(aes(x=supp, y=len),data = ToothGrowth)+ geom_boxplot(aes(fill=supp)) + facet_grid(.~dose)+ xlab("Supplement") + ylab("Tooth Length")+ ggtitle(" Tooth Length compared to Delivery Method")
+print (bxplt2)
+```
+
+## Hyposthesis Testing
+Now we will perform Hypothesis testing to determine if the categorical variables affect the result i.e. the length of Tooth. 
+
+### Supplement as a Factor
+For this we will use t test. First we will run the test on the basis of supplement chosen.
+```{r}
+t.test(len~supp,data=ToothGrowth)
+```
+We can see that the p-value is more than 0.05 and the confidence interval has zero in it.
+Therefore, we can conclude that supplement types don't have impact on the Tooth growth in this test.
+
+### Dosage as a Factor
+Now we shall run a t test to see if the Dosage is a Factor or not.
+First we will split the Dosage data into subsets of two
+```{r}
+TG_dose1 <- subset (ToothGrowth, dose %in% c(0.5, 1.0)) 
+TG_dose2 <- subset (ToothGrowth, dose %in% c(0.5, 2.0)) 
+TG_dose3 <- subset (ToothGrowth, dose %in% c(1.0, 2.0)) 
+```
+
+Checking for dose levels (0.5,1.0)
+```{r}
+t.test(len~dose,data=TG_dose1)
+```
+
+Checking for dose levels (0.5,2.0)
+```{r}
+t.test(len~dose,data=TG_dose2)
+```
+
+Checking for dose levels (2.0,1.0)
+```{r}
+t.test(len~dose,data=TG_dose3)
+```
+As we can see for all the three t tests the p-value is much less than 0.05 and the confidence interval does not contain zero.
+Based on this we can make a conclusion that tooth length is directly related to the dosage.
+Hence we reject the null hypothesis.
+
+### Assumptions
+1. The sample is representative of the population of guinea pigs
+2. For the t-tests, the variances are assumed to be different for the two groups being compared.
+3. The distribution of sample means follows Central Limit Theorem
+
